@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import Page from './Page';
 import * as HeaderStories from './Header.stories';
@@ -7,9 +7,9 @@ import * as HeaderStories from './Header.stories';
 export default {
   title: 'Example/Page',
   component: Page,
-} as ComponentMeta<typeof Page>;
+} as Meta<typeof Page>;
 
-const Template: ComponentStory<typeof Page> = (args) => {
+const Template: StoryFn<typeof Page> = (args) => {
   document.addEventListener(
     'storybookcssvariables:theme:change',
     (event: CustomEvent) => {
