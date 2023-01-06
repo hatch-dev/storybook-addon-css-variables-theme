@@ -1,4 +1,4 @@
-import addons, { makeDecorator } from '@storybook/addons';
+import { makeDecorator } from '@storybook/addons';
 import getCookie from './getCookie';
 
 import { ADDON_PARAM_KEY, CLEAR_LABEL, EVENT_NAME } from './constants';
@@ -54,13 +54,32 @@ export default makeDecorator({
   parameterName: ADDON_PARAM_KEY,
   wrapper: (getStory, context, { parameters }) => {
     const { files, theme, defaultTheme } = parameters;
-    const channel = addons.getChannel();
     const cookieId = getCookie('cssVariables');
     // eslint-disable-next-line max-len
     const savedTheme = cookieId && (Object.hasOwnProperty.call(files, cookieId) || cookieId === CLEAR_LABEL) ? cookieId : null;
     const themeToLoad = theme || savedTheme || defaultTheme;
     handleStyleSwitch({ id: themeToLoad, files, save: !theme || !savedTheme });
-    channel.on('cssVariablesChange', ({ id }: { id: string }) => handleStyleSwitch({ id, files, save: true }));
+    window.addEventListener(
+      'message',
+      (event) => {
+        let parsed;
+        try {
+          parsed = JSON.parse(event.data);
+        } catch (e) {
+          return;
+        }
+
+        if (parsed.key !== 'storybookcssvariables:theme:change') {
+          return;
+        }
+
+        handleStyleSwitch({
+          id: parsed.id,
+          files,
+          save: true,
+        });
+      },
+    );
 
     return getStory(context);
   },

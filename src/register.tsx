@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { addons, types } from '@storybook/addons';
 import { styled } from '@storybook/theming';
-import { useChannel, useParameter } from '@storybook/api';
+import { useParameter } from '@storybook/api';
 import {
   Icons,
   IconButton,
@@ -47,8 +47,6 @@ const Dropdown = () => {
   const id = files && Object.hasOwnProperty.call(files, cookieTheme) && cookieTheme;
   const [selected, setSelected] = useState(theme || id);
 
-  const emit = useChannel({});
-
   useEffect(() => {
     if (!selected) {
       setSelected(theme || id || defaultTheme);
@@ -58,7 +56,12 @@ const Dropdown = () => {
   function handleChange(onHide: () => void, value: string | null) {
     const newValue = value.indexOf(CLEAR_LABEL) > -1 ? CLEAR_LABEL : value;
     setSelected(newValue);
-    emit('cssVariablesChange', { id: newValue });
+    document.querySelector<HTMLIFrameElement>('#storybook-preview-iframe').contentWindow.postMessage(
+      JSON.stringify({
+        key: 'storybookcssvariables:theme:change',
+        id: newValue,
+      }), '*',
+    );
     onHide();
   }
 
